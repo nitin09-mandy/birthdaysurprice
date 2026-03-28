@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sneha Birthday Surprise</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+margin:0;
+background:black;
+overflow:hidden;
+text-align:center;
+font-family:'Pacifico',cursive;
+color:white;
+}
+
+/* BUTTON */
+#start{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+padding:20px 50px;
+font-size:28px;
+background:#ff4d6d;
+border:none;
+border-radius:12px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 20px #ff4d6d;
+}
+
+/* MESSAGE */
+#message{
+display:none;
+position:absolute;
+top:35%;
+width:100%;
+font-size:45px;
+line-height:1.6;
+text-shadow:0 0 8px #ff4d6d,0 0 18px #ff4d6d;
+}
+
+/* NAME */
+#snehaName{
+position:absolute;
+top:60%;
+width:100%;
+font-size:80px;
+text-shadow:0 0 10px #ff4d6d,0 0 30px #ff4d6d;
+}
+
+/* HEART FALL */
+.heart{
+position:absolute;
+color:#ff2e63;
+font-size:30px;
+animation:fall 6s linear infinite;
+}
+
+@keyframes fall{
+0%{transform:translateY(-10vh);opacity:1;}
+100%{transform:translateY(110vh);opacity:0;}
+}
+
+/* CANVAS */
+canvas{
+position:fixed;
+top:0;
+left:0;
+pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<button id="start" onclick="startSurprise()">Tap Here 💖</button>
+
+<div id="message"></div>
+
+<audio id="music" src="ishqa.mp3" loop></audio>
+
+<script>
+
+/* TEXT */
+const text="🎂 Happy Birthday My Dear Best Friend 💐<br>You are truly special to me ❤";
+let i=0;
+
+/* START */
+function startSurprise(){
+
+document.getElementById("start").style.display="none";
+
+const msg=document.getElementById("message");
+msg.style.display="block";
+
+/* music */
+const music=document.getElementById("music");
+music.currentTime = 0;
+music.muted = false;
+
+music.play().then(()=>{
+console.log("Music started");
+}).catch((err)=>{
+console.log("Error:", err);
+});
+
+/* start animations */
+typeWriter();
+showSneha();
+startFireworks();   // ✅ ADD THIS
+setInterval(createHeart,200);
+
+}
+
+/* TYPEWRITER (FIXED) */
+function typeWriter(){
+
+const element=document.getElementById("message");
+element.innerHTML=text.substring(0,i);
+
+i++;
+
+if(i<=text.length){
+setTimeout(typeWriter,60);
+}
+
+}
+
+/* NAME ANIMATION */
+function showSneha(){
+
+const name="Aarti";
+let j=0;
+
+let element=document.createElement("div");
+element.id="snehaName";
+document.body.appendChild(element);
+
+function typeName(){
+
+if(j<name.length){
+
+element.innerHTML+=name.charAt(j);
+j++;
+
+setTimeout(typeName,200);
+
+}else{
+heartBurst();
+}
+
+}
+
+setTimeout(typeName,2000);
+
+}
+
+/* HEART BURST */
+function heartBurst(){
+
+const centerX=window.innerWidth/2;
+const centerY=window.innerHeight*0.6;
+
+for(let k=0;k<20;k++){
+
+const angle=(k/20)*Math.PI*2;
+
+const heart=document.createElement("div");
+heart.innerHTML="💖";
+
+heart.style.position="absolute";
+heart.style.left=centerX+"px";
+heart.style.top=centerY+"px";
+
+heart.style.transition="transform 1s ease-out, opacity 1s";
+
+document.body.appendChild(heart);
+
+setTimeout(()=>{
+
+const x=Math.cos(angle)*90;
+const y=Math.sin(angle)*90;
+
+heart.style.transform=`translate(${x}px,${y}px)`;
+heart.style.opacity="0";
+
+},50);
+
+setTimeout(()=>{heart.remove();},600);
+
+}
+
+}
+
+/* FALLING HEARTS */
+function createHeart(){
+
+const heart=document.createElement("div");
+
+heart.classList.add("heart");
+heart.innerHTML="❤";
+
+heart.style.left=Math.random()*100+"vw";
+heart.style.fontSize=(20+Math.random()*40)+"px";
+
+document.body.appendChild(heart);
+
+setTimeout(()=>{heart.remove();},6000);
+
+}
+
+/* FIREWORKS */
+
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let rockets=[];
+let particles=[];
+
+function launchRocket(){
+
+rockets.push({
+x:Math.random()*canvas.width,
+y:canvas.height,
+speedX:(Math.random()-0.5)*3,
+speedY:-8-Math.random()*3,
+life:70,
+color:`hsl(${Math.random()*360},100%,60%)`
+});
+
+}
+
+function explode(x,y,color){
+
+for(let i=0;i<40;i++){
+
+particles.push({
+x:x,
+y:y,
+speedX:(Math.random()-0.5)*8,
+speedY:(Math.random()-0.5)*8,
+life:60,
+symbol:"♥️"
+});
+
+}
+
+}
+
+function update(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+/* rockets */
+rockets.forEach((r,index)=>{
+
+r.x+=r.speedX;
+r.y+=r.speedY;
+
+ctx.fillStyle=r.color;
+ctx.fillRect(r.x,r.y,3,10);
+
+r.life--;
+
+if(r.life<=0){
+explode(r.x,r.y,r.color);
+rockets.splice(index,5);
+}
+
+});
+
+/* particles */
+particles.forEach((p,index)=>{
+
+p.x += p.speedX;
+p.y += p.speedY;
+p.life--;
+
+ctx.font="8px Arial";
+ctx.fillText(p.symbol,p.x,p.y);
+
+if(p.life<=0){
+particles.splice(index,2);
+}
+
+});
+
+requestAnimationFrame(update);
+
+}
+
+setInterval(launchRocket,200);
+
+update();
+</script>
+
+</body>
+</html>
