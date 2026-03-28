@@ -1,38 +1,256 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Birthday Surprise</title>
-    <script>
-        // Ensure consistent arrow function syntax
-        const updateCanvas = () => {
-            const canvas = document.getElementById('myCanvas');
-            const ctx = canvas.getContext('2d');
-            // Canvas drawing logic
-        };
-        
-        // Update typeName function to prevent innerHTML vulnerability
-        const typeName = (name) => {
-            const displayName = document.getElementById('nameDisplay');
-            // Use textContent to prevent XSS
-            displayName.textContent = name;
-        };
+<title>Birthday Surprise</title>
 
-        const resizeCanvas = () => {
-            const canvas = document.getElementById('myCanvas');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            updateCanvas();
-        };
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
-        window.addEventListener('resize', resizeCanvas);
-    </script>
+<style>
+body{
+  margin:0;
+  background:black;
+  overflow:hidden;
+  font-family:'Pacifico',cursive;
+  color:white;
+}
+
+/* BUTTON */
+#start{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:20px 50px;
+  font-size:28px;
+  background:#ff4d6d;
+  border:none;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 0 20px #ff4d6d;
+}
+
+/* MESSAGE */
+#message{
+  display:none;
+  position:absolute;
+  top:45%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:100%;
+  text-align:center;
+  font-size:45px;
+  text-shadow:0 0 8px #ff4d6d,0 0 18px #ff4d6d;
+}
+
+/* NAME */
+#name{
+  position:absolute;
+  top:60%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:80px;
+  text-shadow:0 0 10px #ff4d6d,0 0 30px #ff4d6d;
+}
+
+/* HEART ANIMATION */
+@keyframes fall{
+  0%{transform:translateY(-10vh);opacity:1;}
+  100%{transform:translateY(110vh);opacity:0;}
+}
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  pointer-events:none;
+}
+</style>
 </head>
+
 <body>
-    <canvas id="myCanvas"></canvas>
-    <input type="text" id="nameInput" placeholder="Enter your name" />
-    <button onclick="typeName(document.getElementById('nameInput').value)">Submit</button>
-    <div id="nameDisplay"></div>
+
+<canvas id="fireworks"></canvas>
+
+<button id="start" onclick="start()">Tap Here 💖</button>
+
+<div id="message"></div>
+
+<audio id="music" src="ishqa.mp3" loop></audio>
+
+<script>
+
+/* TEXT */
+const text="🎂 Happy Birthday Dear";
+let i=0;
+
+/* START FUNCTION */
+function start(){
+
+  document.getElementById("start").style.display="none";
+
+  const msg=document.getElementById("message");
+  msg.style.display="block";
+
+  /* AUDIO FIX */
+  const music=document.getElementById("music");
+  music.currentTime=0;
+  music.muted=false;
+  music.play().catch(()=>{
+    alert("Tap again to enable sound 🎵");
+  });
+
+  typeWriter();
+  showName();
+  setInterval(createHeart,200);
+}
+
+/* TYPEWRITER */
+function typeWriter(){
+  const el=document.getElementById("message");
+  el.innerHTML=text.substring(0,i);
+  i++;
+
+  if(i<=text.length){
+    setTimeout(typeWriter,60);
+  }
+}
+
+/* NAME ANIMATION */
+function showName(){
+
+  const nameText="Aarti";
+  let j=0;
+
+  const el=document.createElement("div");
+  el.id="name";
+  document.body.appendChild(el);
+
+  function type(){
+    if(j<nameText.length){
+      el.innerHTML+=nameText[j];
+      j++;
+      setTimeout(type,200);
+    }else{
+      heartBurst();
+    }
+  }
+
+  setTimeout(type,2000);
+}
+
+/* HEART BURST */
+function heartBurst(){
+  const cx=window.innerWidth/2;
+  const cy=window.innerHeight*0.6;
+
+  for(let k=0;k<20;k++){
+    const angle=(k/20)*Math.PI*2;
+
+    const h=document.createElement("div");
+    h.innerHTML="💖";
+
+    h.style.position="absolute";
+    h.style.left=cx+"px";
+    h.style.top=cy+"px";
+    h.style.transition="1s";
+
+    document.body.appendChild(h);
+
+    setTimeout(()=>{
+      h.style.transform=`translate(${Math.cos(angle)*100}px,${Math.sin(angle)*100}px)`;
+      h.style.opacity="0";
+    },50);
+
+    setTimeout(()=>h.remove(),800);
+  }
+}
+
+/* FALLING HEARTS */
+function createHeart(){
+  const h=document.createElement("div");
+  h.innerHTML="❤️";
+
+  h.style.position="fixed";
+  h.style.left=Math.random()*100+"vw";
+  h.style.top="-10px";
+  h.style.fontSize="20px";
+  h.style.animation="fall 5s linear";
+
+  document.body.appendChild(h);
+
+  setTimeout(()=>h.remove(),5000);
+}
+
+/* FIREWORKS */
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let rockets=[];
+let particles=[];
+
+function launch(){
+  rockets.push({
+    x:Math.random()*canvas.width,
+    y:canvas.height,
+    sx:(Math.random()-0.5)*3,
+    sy:-8-Math.random()*3,
+    life:70,
+    color:`hsl(${Math.random()*360},100%,60%)`
+  });
+}
+
+function explode(x,y){
+  for(let i=0;i<40;i++){
+    particles.push({
+      x,y,
+      sx:(Math.random()-0.5)*8,
+      sy:(Math.random()-0.5)*8,
+      life:60
+    });
+  }
+}
+
+function update(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  rockets.forEach((r,i)=>{
+    r.x+=r.sx;
+    r.y+=r.sy;
+    r.life--;
+
+    ctx.fillStyle=r.color;
+    ctx.fillRect(r.x,r.y,3,10);
+
+    if(r.life<=0){
+      explode(r.x,r.y);
+      rockets.splice(i,1);
+    }
+  });
+
+  particles.forEach((p,i)=>{
+    p.x+=p.sx;
+    p.y+=p.sy;
+    p.life--;
+
+    ctx.fillStyle="white";
+    ctx.fillText("♥",p.x,p.y);
+
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+  });
+
+  requestAnimationFrame(update);
+}
+
+setInterval(launch,300);
+update();
+
+</script>
+
 </body>
 </html>
