@@ -97,7 +97,7 @@ function start(){
   music.currentTime=0;
   music.muted=false;
   music.play().catch(()=>{
-    alert("Tap again to enable sound 🎵");
+    
   });
 
   typeWriter();
@@ -196,10 +196,10 @@ function launch(){
   rockets.push({
     x:Math.random()*canvas.width,
     y:canvas.height,
-    sx:(Math.random()-0.5)*3,
+    sx:(Math.random()-0.5)*6,
     sy:-8-Math.random()*3,
     life:70,
-    color:`hsl(${Math.random()*360},100%,60%)`
+    color:`hsl(${Math.random()*360},100%,90%)`
   });
 }
 
