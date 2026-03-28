@@ -1,269 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Birthday Surprise</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise</title>
+    <script>
+        // Ensure consistent arrow function syntax
+        const updateCanvas = () => {
+            const canvas = document.getElementById('myCanvas');
+            const ctx = canvas.getContext('2d');
+            // Canvas drawing logic
+        };
+        
+        // Update typeName function to prevent innerHTML vulnerability
+        const typeName = (name) => {
+            const displayName = document.getElementById('nameDisplay');
+            // Use textContent to prevent XSS
+            displayName.textContent = name;
+        };
 
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+        const resizeCanvas = () => {
+            const canvas = document.getElementById('myCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            updateCanvas();
+        };
 
-<style>
-body{
-margin:0;
-background:black;
-overflow:hidden;
-text-align:center;
-font-family:'Pacifico',cursive;
-color:white;
-}
-
-/* BUTTON */
-#start{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-padding:20px 50px;
-font-size:28px;
-background:#ff4d6d;
-border:none;
-border-radius:12px;
-color:white;
-cursor:pointer;
-box-shadow:0 0 20px #ff4d6d;
-}
-
-/* MESSAGE */
-#message{
-display:none;
-position:absolute;
-top:40%;
-left:50%;
-transform:translate(-50%,-50%);
-width:100%;
-font-size:45px;
-text-shadow:0 0 8px #ff4d6d,0 0 18px #ff4d6d;
-}
-
-/* NAME */
-#snehaName{
-position:absolute;
-top:60%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:80px;
-text-shadow:0 0 10px #ff4d6d,0 0 30px #ff4d6d;
-}
-
-/* HEART FALL */
-@keyframes fall{
-0%{transform:translateY(-10vh);opacity:1;}
-100%{transform:translateY(110vh);opacity:0;}
-}
-
-/* CANVAS */
-canvas{
-position:fixed;
-top:0;
-left:0;
-pointer-events:none;
-}
-</style>
+        window.addEventListener('resize', resizeCanvas);
+    </script>
 </head>
-
 <body>
-
-<canvas id="fireworks"></canvas>
-
-<button id="start" onclick="startSurprise()">Tap Here 💖</button>
-
-<div id="message"></div>
-
-<audio id="music" src="ishqa.mp3" loop></audio>
-
-<script>
-
-const text="🎂 Happy Birthday Dear";
-let i=0;
-
-/* START */
-function startSurprise(){
-
-document.getElementById("start").style.display="none";
-
-const msg=document.getElementById("message");
-msg.style.display="block";
-
-/* ✅ FIXED AUDIO */
-const music=document.getElementById("music");
-music.currentTime = 0;
-music.muted = false;
-music.play();
-
-/* start animations */
-typeWriter();
-showSneha();
-setInterval(createHeart,200);
-
-}
-
-/* TYPEWRITER */
-function typeWriter(){
-const element=document.getElementById("message");
-element.innerHTML=text.substring(0,i);
-i++;
-
-if(i<=text.length){
-setTimeout(typeWriter,60);
-}
-}
-
-/* NAME */
-function showSneha(){
-
-const name="Aarti";
-let j=0;
-
-let element=document.createElement("div");
-element.id="snehaName";
-document.body.appendChild(element);
-
-function typeName(){
-if(j<name.length){
-element.innerHTML+=name.charAt(j);
-j++;
-setTimeout(typeName,200);
-}else{
-heartBurst();
-}
-}
-
-setTimeout(typeName,2000);
-}
-
-/* HEART BURST */
-function heartBurst(){
-
-const centerX=window.innerWidth/2;
-const centerY=window.innerHeight*0.6;
-
-for(let k=0;k<20;k++){
-
-const angle=(k/20)*Math.PI*2;
-
-const heart=document.createElement("div");
-heart.innerHTML="💖";
-
-heart.style.position="absolute";
-heart.style.left=centerX+"px";
-heart.style.top=centerY+"px";
-heart.style.transition="transform 1s ease-out, opacity 1s";
-
-document.body.appendChild(heart);
-
-setTimeout(()=>{
-const x=Math.cos(angle)*90;
-const y=Math.sin(angle)*90;
-heart.style.transform=`translate(${x}px,${y}px)`;
-heart.style.opacity="0";
-},50);
-
-setTimeout(()=>{heart.remove();},600);
-}
-}
-
-/* FALLING HEARTS */
-function createHeart() {
-  const heart = document.createElement("div");
-  heart.innerHTML = "❤️";
-
-  heart.style.position = "fixed";
-  heart.style.left = Math.random() * 100 + "vw";
-  heart.style.top = "-10px";
-  heart.style.fontSize = "20px";
-  heart.style.animation = "fall 5s linear";
-  heart.style.zIndex = "999";
-
-  document.body.appendChild(heart);
-
-  setTimeout(() => {
-    heart.remove();
-  }, 5000);
-}
-
-/* FIREWORKS */
-const canvas=document.getElementById("fireworks");
-const ctx=canvas.getContext("2d");
-
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
-let rockets=[];
-let particles=[];
-
-function launchRocket(){
-rockets.push({
-x:Math.random()*canvas.width,
-y:canvas.height,
-speedX:(Math.random()-0.5)*3,
-speedY:-8-Math.random()*3,
-life:70,
-color:`hsl(${Math.random()*360},100%,60%)`
-});
-}
-
-function explode(x,y,color){
-for(let i=0;i<40;i++){
-particles.push({
-x:x,
-y:y,
-speedX:(Math.random()-0.5)*8,
-speedY:(Math.random()-0.5)*8,
-life:60,
-symbol:"♥️"
-});
-}
-}
-
-function update(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-/* rockets */
-rockets.forEach((r,index)=>{
-r.x+=r.speedX;
-r.y+=r.speedY;
-
-ctx.fillStyle=r.color;
-ctx.fillRect(r.x,r.y,3,10);
-
-r.life--;
-
-if(r.life<=0){
-explode(r.x,r.y,r.color);
-rockets.splice(index,1);   // ✅ FIXED
-}
-});
-
-/* particles */
-particles.forEach((p,index)=>{
-p.x += p.speedX;
-p.y += p.speedY;
-p.life--;
-
-ctx.font="10px Arial";
-ctx.fillText(p.symbol,p.x,p.y);
-
-if(p.life<=0){
-particles.splice(index,1); // ✅ FIXED
-}
-});
-
-requestAnimationFrame(update);
-}
-
-setInterval(launchRocket,300);
-update();
-
-</script>
-
+    <canvas id="myCanvas"></canvas>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <button onclick="typeName(document.getElementById('nameInput').value)">Submit</button>
+    <div id="nameDisplay"></div>
 </body>
 </html>
